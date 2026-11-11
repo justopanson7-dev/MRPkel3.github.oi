@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Perencanaan MRP{% endblock %}
+{% block breadcrumb %}Perencanaan MRP{% endblock %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">MATERIAL REQUIREMENTS PLANNING</span><h1>Perencanaan material</h1><p>Kebutuhan dihitung dari perintah produksi berstatus direncanakan atau dirilis.</p></div><a class="button secondary" href="{% url 'production_order_create' %}">＋ Tambah rencana</a></div>
+<section class="planning-note"><span class="note-icon">i</span><div><strong>Rumus MRP</strong><p>Kebutuhan bersih = kebutuhan total dari BOM − stok tersedia. Hasil ini adalah perencanaan; belum melakukan reservasi atau pengeluaran stok.</p></div></section>
+{% if orders_without_bom %}
+<section class="planning-note warning-note"><span class="note-icon">!</span><div><strong>{{ orders_without_bom|length }} perintah belum memiliki BOM</strong><p>Produk di bawah ini tidak masuk perhitungan kebutuhan material sampai komponennya ditambahkan.</p><div class="missing-bom-list">{% for order in orders_without_bom %}<span>{{ order.code }} · {{ order.product.name }}</span>{% endfor %}</div></div></section>
+{% endif %}
+<section class="panel">
+  <div class="panel-header"><div><span class="eyebrow">RINGKASAN KEBUTUHAN</span><h2>{{ requirements|length }} jenis bahan dibutuhkan</h2></div></div>
+  <div class="table-wrap"><table><thead><tr><th>BAHAN BAKU</th><th>KEBUTUHAN TOTAL</th><th>STOK TERSEDIA</th><th>KEKURANGAN</th><th>STATUS</th></tr></thead><tbody>
+  {% for row in requirements %}<tr><td><strong>{{ row.material.name }}</strong><small class="table-sub">{{ row.material.sku }}</small></td><td>{{ row.required|floatformat:2 }} {{ row.material.unit }}</td><td>{{ row.available|floatformat:2 }} {{ row.material.unit }}</td><td class="{% if row.is_short %}shortage{% endif %}">{{ row.shortage|floatformat:2 }} {{ row.material.unit }}</td><td>{% if row.is_short %}<span class="badge warning">Perlu pengadaan</span>{% else %}<span class="badge good">Stok mencukupi</span>{% endif %}</td></tr>
+  {% empty %}<tr><td colspan="5"><div class="empty-inline">Belum ada kebutuhan. Tambahkan produk, BOM, dan perintah produksi berstatus Direncanakan.</div></td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% endblock %}

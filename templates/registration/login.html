@@ -1,0 +1,35 @@
+{% load static %}
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Masuk · TempoWorks</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body class="login-page">
+  <div class="login-art"><div class="login-art-content"><span class="brand-mark large">T</span><h1>Waktu yang tepat.<br><em>Produksi yang terukur.</em></h1><p>Satu ruang kerja untuk merencanakan setiap komponen dan proses pembuatan jam Anda.</p><div class="clock-art"><span>12</span><span>3</span><span>6</span><span>9</span><i></i><b></b></div></div></div>
+  <main class="login-panel">
+    <div class="login-form-wrap">
+      <a class="brand login-brand" href="#"><span class="brand-mark">T</span><span><strong>TempoWorks</strong><small>FACTORY OPERATIONS</small></span></a>
+      <span class="eyebrow">SELAMAT DATANG</span>
+      <h2>Masuk ke workspace</h2>
+      <p class="muted">Kelola rencana produksi Anda dengan lebih mudah.</p>
+      {% if form.errors %}<div class="message error">Nama pengguna atau kata sandi tidak sesuai.</div>{% endif %}
+      <form method="post" class="stack-form login-form">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+        <label for="id_username">Nama pengguna</label>
+        <input class="form-control" type="text" name="username" id="id_username" autocomplete="username" required autofocus>
+        <label for="id_password">Kata sandi</label>
+        <input class="form-control" type="password" name="password" id="id_password" autocomplete="current-password" required>
+        <button class="button primary full-button" type="submit">Masuk <span>→</span></button>
+      </form>
+      <p class="login-note">Akses hanya untuk tim internal perusahaan.</p>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Data historis{% endblock %}
+{% block breadcrumb %}Data historis{% endblock %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">DATA PERENCANAAN</span><h1>Histori volume jam dinding</h1><p>Angka periode mengikuti workbook sumber; rentang tanggal kalender tidak tersedia.</p></div></div>
+<div class="stat-grid history-stats">
+  <article class="stat-card"><div class="stat-top"><span class="stat-icon mint">▥</span><span class="stat-caption">DATA PERUSAHAAN</span></div><div class="stat-value">{{ company_total }}</div><div class="stat-label">unit pada {{ records|length }} periode</div></article>
+  <article class="stat-card"><div class="stat-top"><span class="stat-icon lavender">▥</span><span class="stat-caption">DATA PEMBANDING</span></div><div class="stat-value">{{ competitor_total }}</div><div class="stat-label">unit pesaing pada periode sama</div></article>
+</div>
+<section class="panel chart-panel">
+  <div class="panel-header"><div><span class="eyebrow">PERBANDINGAN PER PERIODE</span><h2>Volume jam dinding (unit)</h2></div><div class="chart-legend"><span><i class="legend-company"></i> Perusahaan</span><span><i class="legend-competitor"></i> Pesaing</span></div></div>
+  {% if records %}
+  <div class="chart-scroll"><div class="bar-chart">
+    {% for row in records %}<div class="bar-column" title="Periode {{ row.period_number }}: perusahaan {{ row.company_units }} unit; pesaing {{ row.competitor_units }} unit"><div class="bar-pair"><span class="bar-company" style="height:{{ row.company_height }}%"></span><span class="bar-competitor" style="height:{{ row.competitor_height }}%"></span></div><small>{{ row.period_number }}</small></div>{% endfor %}
+  </div></div>
+  <div class="chart-axis-label">Periode berurutan sesuai data workbook · bukan tanggal kalender</div>
+  {% else %}<div class="empty-state"><span>▥</span><strong>Data historis belum diimpor</strong><p>Impor workbook untuk melihat riwayat volume.</p></div>{% endif %}
+</section>
+<section class="panel history-table-panel">
+  <div class="panel-header"><div><span class="eyebrow">DATA SUMBER</span><h2>Rincian per periode</h2></div></div>
+  <div class="table-wrap"><table><thead><tr><th>PERIODE</th><th>PERUSAHAAN (UNIT)</th><th>PESAING (UNIT)</th></tr></thead><tbody>
+  {% for row in records %}<tr><td class="code-cell">{{ row.period_number }}</td><td>{{ row.company_units }}</td><td>{{ row.competitor_units }}</td></tr>{% empty %}<tr><td colspan="3"><div class="empty-inline">Belum ada data untuk ditampilkan.</div></td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% endblock %}

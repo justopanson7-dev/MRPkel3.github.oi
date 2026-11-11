@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Ringkasan{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><span class="eyebrow">SELASA · OPERASIONAL</span><h1>Selamat datang, {{ request.user.username|title }} <span class="wave">✦</span></h1><p>Pantau kebutuhan bahan dan rencana produksi jam dinding Anda.</p></div>
+  {% if can_change_production %}<a class="button primary" href="{% url 'production_order_create' %}"><span class="button-plus">＋</span> Buat perintah produksi</a>{% endif %}
+</div>
+<div class="stat-grid">
+  {% if can_view_production %}<article class="stat-card"><div class="stat-top"><span class="stat-icon mint">◷</span><span class="stat-caption">DATA TERKELOLA</span></div><div class="stat-value">{{ product_count }}</div><div class="stat-label">Produk aktif</div><div class="stat-foot"><span class="stat-foot-icon">↗</span> {{ bom_count }} produk punya BOM</div></article>{% endif %}
+  {% if module_visibility.inventory %}<article class="stat-card"><div class="stat-top"><span class="stat-icon lavender">▦</span><span class="stat-caption">INVENTARIS</span></div><div class="stat-value">{{ material_count }}</div><div class="stat-label">Jenis bahan baku</div><div class="stat-foot"><span class="stat-foot-icon">↗</span> Terdaftar di gudang</div></article>{% endif %}
+  {% if can_view_production %}<article class="stat-card"><div class="stat-top"><span class="stat-icon peach">▤</span><span class="stat-caption">DALAM RENCANA</span></div><div class="stat-value">{{ active_orders }}</div><div class="stat-label">Perintah produksi</div><div class="stat-foot"><span class="stat-foot-icon">↗</span> Perlu diproses</div></article>{% endif %}
+  {% if can_view_history %}<article class="stat-card"><div class="stat-top"><span class="stat-icon mint">▥</span><span class="stat-caption">HISTORI VOLUME</span></div><div class="stat-value">{{ demand_periods }}</div><div class="stat-label">Periode data</div><div class="stat-foot"><a class="text-link" href="{% url 'demand_history' %}">Lihat data historis →</a></div></article>{% endif %}
+</div>
+{% if can_view_production %}<div class="content-grid">
+  <section class="panel">
+    <div class="panel-header"><div><span class="eyebrow">JADWAL TERDEKAT</span><h2>Perintah produksi</h2></div><a class="text-link" href="{% url 'production_orders' %}">Lihat semua <span>→</span></a></div>
+    {% if upcoming_orders %}
+    <div class="table-wrap"><table><thead><tr><th>PERINTAH</th><th>PRODUK</th><th>JUMLAH</th><th>TARGET</th><th>STATUS</th></tr></thead><tbody>
+      {% for order in upcoming_orders %}<tr><td class="code-cell">{{ order.code }}</td><td><strong>{{ order.product.name }}</strong></td><td>{{ order.quantity }} unit</td><td>{{ order.due_date|date:"d M Y" }}</td><td><span class="badge {{ order.status }}">{{ order.get_status_display }}</span></td></tr>{% endfor %}
+    </tbody></table></div>
+    {% else %}<div class="empty-state"><span>◷</span><strong>Belum ada rencana produksi</strong><p>Buat perintah pertama untuk mulai menghitung kebutuhan bahan.</p><a class="text-link" href="{% url 'production_order_create' %}">Buat perintah <span>→</span></a></div>{% endif %}
+  </section>
+  <aside class="panel low-stock-panel">
+    <div class="panel-header"><div><span class="eyebrow">PERLU DIPANTAU</span><h2>Stok menipis</h2></div><span class="mini-icon">!</span></div>
+    {% if low_stock_materials %}
+    <div class="stock-list">{% for material in low_stock_materials %}<div class="stock-item"><div class="stock-symbol">▦</div><div class="stock-name"><strong>{{ material.name }}</strong><small>{{ material.sku }}</small></div><div class="stock-amount"><strong>{{ material.stock_on_hand|floatformat:0 }}</strong><small>{{ material.unit }}</small></div></div>{% endfor %}</div>
+    <a class="button secondary full-button" href="{% url 'materials' %}">Kelola bahan baku <span>→</span></a>
+    {% else %}<div class="empty-state compact"><span>✓</span><strong>Stok aman</strong><p>Tidak ada bahan yang berada di bawah stok minimum.</p><a class="text-link" href="{% url 'materials' %}">Lihat inventaris <span>→</span></a></div>{% endif %}
+  </aside>
+</div>
+{% endif %}
+{% if can_view_history and demand_periods %}
+<section class="history-summary"><div><span class="eyebrow">DATA DARI WORKBOOK</span><h2>{{ company_units_total }} unit volume perusahaan tercatat</h2><p>Seri per periode tersimpan dan dapat ditinjau sebelum digunakan sebagai acuan perencanaan.</p></div><a class="button secondary" href="{% url 'demand_history' %}">Buka data historis <span>→</span></a></section>
+{% endif %}
+{% if can_view_finance %}
+<section class="history-summary"><div><span class="eyebrow">KEUANGAN</span><h2>Pantau piutang dan arus kas</h2><p>Buka ringkasan omzet, komitmen pembelian, dan buku kas.</p></div><a class="button secondary" href="{% url 'finance' %}">Buka keuangan <span>→</span></a></section>
+{% endif %}
+{% if can_view_sales %}
+<section class="history-summary"><div><span class="eyebrow">PENJUALAN</span><h2>Kelola pesanan pelanggan</h2><p>Periksa stok produk jadi sebelum pengiriman.</p></div><a class="button secondary" href="{% url 'sales_orders' %}">Buka penjualan <span>→</span></a></section>
+{% endif %}
+{% if can_view_purchasing %}
+<section class="history-summary"><div><span class="eyebrow">PEMBELIAN</span><h2>Kelola PO dan penerimaan bahan</h2><p>Penerimaan PO memperbarui stok sekaligus buku kas.</p></div><a class="button secondary" href="{% url 'purchase_orders' %}">Buka pembelian <span>→</span></a></section>
+{% endif %}
+{% if can_view_production %}
+<section class="planning-banner"><div class="banner-icon">✳</div><div><span class="eyebrow">PERENCANAAN MATERIAL</span><h2>Siapkan bahan sebelum produksi dimulai.</h2><p>MRP menghitung total kebutuhan komponen dari BOM dan membandingkannya dengan stok tersedia.</p></div><a class="button light" href="{% url 'mrp_report' %}">Buka laporan MRP <span>→</span></a><div class="banner-decoration">◷</div></section>
+{% endif %}
+{% endblock %}

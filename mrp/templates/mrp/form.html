@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block breadcrumb %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">DATA OPERASIONAL</span><h1>{{ title }}</h1><p>Lengkapi data di bawah ini, lalu simpan untuk memperbarui rencana produksi.</p></div></div>
+<section class="panel form-panel narrow-panel">
+  <form method="post" class="stack-form">{% csrf_token %}
+    {% for field in form %}<div class="field-group"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small class="help-text">{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>{% endfor %}
+    {% if form.non_field_errors %}<div class="field-error">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="form-actions"><a class="button secondary" href="javascript:history.back()">Batal</a><button class="button primary" type="submit">Simpan data <span>→</span></button></div>
+  </form>
+</section>
+{% endblock %}

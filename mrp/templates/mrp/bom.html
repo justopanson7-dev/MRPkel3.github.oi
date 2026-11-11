@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Bill of Materials{% endblock %}
+{% block breadcrumb %}Bill of Materials{% endblock %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">RESEP PRODUKSI</span><h1>Bill of Materials</h1><p>Tentukan jumlah setiap bahan yang dibutuhkan untuk membuat satu produk.</p></div></div>
+<div class="bom-layout">
+  {% if form %}<section class="panel form-panel"><div class="panel-header"><div><span class="eyebrow">TAMBAHKAN KOMPONEN</span><h2>Komponen produk</h2></div></div>
+    <form method="post" class="stack-form">{% csrf_token %}
+      {% for field in form %}<div class="field-group"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small class="help-text">{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>{% endfor %}
+      {% if form.non_field_errors %}<div class="field-error">{{ form.non_field_errors }}</div>{% endif %}
+      <button class="button primary" type="submit">Simpan komponen <span>→</span></button>
+    </form>
+  </section>{% endif %}
+  <section class="panel"><div class="panel-header"><div><span class="eyebrow">KOMPONEN TERSUSUN</span><h2>{{ bom_items|length }} baris BOM</h2></div></div>
+    <div class="table-wrap"><table><thead><tr><th>PRODUK</th><th>BAHAN</th><th>KEBUTUHAN / UNIT</th><th></th></tr></thead><tbody>
+      {% for item in bom_items %}<tr><td><strong>{{ item.product.name }}</strong><small class="table-sub">{{ item.product.sku }}</small></td><td>{{ item.material.name }}</td><td>{{ item.quantity|floatformat:3 }} {{ item.material.unit }}</td><td>{% if module_editability.production %}<div class="table-actions"><a class="table-action" href="{% url 'bom_edit' item.id %}">Ubah</a><form method="post" action="{% url 'bom_delete' item.id %}">{% csrf_token %}<button class="icon-button danger-text" type="submit" aria-label="Hapus komponen">×</button></form></div>{% endif %}</td></tr>
+      {% empty %}<tr><td colspan="4"><div class="empty-inline">BOM belum memiliki komponen.</div></td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+</div>
+{% endblock %}

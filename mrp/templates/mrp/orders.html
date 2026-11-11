@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Perintah produksi{% endblock %}
+{% block breadcrumb %}Perintah produksi{% endblock %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">SHOP FLOOR</span><h1>Perintah produksi</h1><p>Rencanakan target, mulai perakitan, dan selesaikan produksi.</p></div>{% if can_change_production %}<a class="button primary" href="{% url 'production_order_create' %}">＋ Buat perintah</a>{% endif %}</div>
+<section class="panel">
+  <div class="panel-header"><div><span class="eyebrow">RENCANA PRODUKSI</span><h2>{{ orders|length }} perintah</h2></div></div>
+  <div class="table-wrap"><table><thead><tr><th>NOMOR</th><th>PRODUK</th><th>JUMLAH</th><th>TARGET SELESAI</th><th>STATUS</th><th>CATATAN</th><th>AKSI</th></tr></thead><tbody>
+  {% for order in orders %}<tr><td class="code-cell">{{ order.code }}</td><td><strong>{{ order.product.name }}</strong><small class="table-sub">{{ order.product.sku }}</small></td><td>{{ order.quantity }} unit</td><td>{{ order.due_date|date:"d M Y" }}</td><td><span class="badge {{ order.status }}">{{ order.get_status_display }}</span></td><td>{{ order.notes|default:"—"|truncatechars:36 }}</td><td>
+    {% if can_change_production and order.status == "planned" %}<form method="post" action="{% url 'production_order_start' order.id %}">{% csrf_token %}<button class="table-action" type="submit">Mulai</button></form>
+    {% elif can_change_production and order.status == "running" %}<form method="post" action="{% url 'production_order_complete' order.id %}">{% csrf_token %}<button class="table-action" type="submit">Selesaikan</button></form>
+    {% elif can_change_production and order.status == "draft" %}<a class="table-action" href="{% url 'production_order_edit' order.id %}">Ubah</a>{% else %}—{% endif %}
+  </td></tr>
+  {% empty %}<tr><td colspan="7"><div class="empty-inline">Belum ada perintah produksi. Buat perintah untuk menyusun rencana.</div></td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% endblock %}

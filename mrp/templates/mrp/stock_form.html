@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block breadcrumb %}<a href="{% url 'materials' %}">Gudang & bahan</a> <span>/</span> {{ title }}{% endblock %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">TRANSAKSI GUDANG</span><h1>{{ title }}</h1><p>{% if transaction_kind == "receipt" %}Tambahkan stok bahan dari barang yang diterima.{% else %}Masukkan hasil perhitungan fisik untuk memperbarui saldo stok.{% endif %}</p></div></div>
+<section class="panel form-panel narrow-panel">
+  {% if transaction_kind == "receipt" %}<div class="planning-note" style="margin:18px 20px"><span class="note-icon">i</span><div><strong>Jumlah akan ditambahkan ke stok saat ini.</strong><p>Pastikan jumlah barang sesuai dokumen penerimaan.</p></div></div>{% else %}<div class="planning-note warning-note" style="margin:18px 20px"><span class="note-icon">!</span><div><strong>Stok akan disetel sama dengan jumlah fisik.</strong><p>Masukkan total stok yang benar-benar dihitung, bukan selisihnya. Nilai 0 diperbolehkan.</p></div></div>{% endif %}
+  <form method="post" class="stack-form">{% csrf_token %}
+    {% for field in form %}<div class="field-group"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small class="help-text">{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>{% endfor %}
+    {% if form.non_field_errors %}<div class="field-error">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="form-actions"><a class="button secondary" href="{% url 'materials' %}">Batal</a><button class="button primary" type="submit">Simpan transaksi <span>→</span></button></div>
+  </form>
+</section>
+{% endblock %}

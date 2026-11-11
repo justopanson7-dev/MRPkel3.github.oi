@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Produk{% endblock %}
+{% block breadcrumb %}Produk{% endblock %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">KATALOG PRODUK</span><h1>Produk jam</h1><p>Atur spesifikasi produk, harga jual, dan BOM untuk menghitung kapasitas serta HPP.</p></div>{% if module_editability.production %}<a class="button primary" href="{% url 'product_create' %}">＋ Tambah produk</a>{% endif %}</div>
+<section class="panel">
+  <div class="panel-header"><div><span class="eyebrow">PRODUK TERDAFTAR</span><h2>{{ products|length }} produk</h2></div>{% if module_editability.production %}<a class="text-link" href="{% url 'bom' %}">Kelola BOM <span>→</span></a>{% endif %}</div>
+  <div class="table-wrap"><table><thead><tr><th>KODE</th><th>NAMA / UKURAN</th><th>STOK</th><th>KAPASITAS</th><th>HARGA JUAL</th><th>HPP / UNIT</th><th>MARGIN</th><th>KOMPONEN BOM</th><th></th></tr></thead><tbody>
+  {% for product in products %}<tr><td class="code-cell">{{ product.sku }}</td><td><strong>{{ product.name }}</strong><small class="table-sub">{{ product.size|default:"Ukuran belum diatur" }}</small></td><td>{{ product.stock_on_hand }} / {{ product.minimum_stock }}</td><td>{{ product.production_capacity }} unit</td><td>Rp {{ product.sale_price|floatformat:"-2" }}</td><td>Rp {{ product.unit_hpp|floatformat:"-2" }}</td><td>{% if product.margin != None %}{{ product.margin|floatformat:0 }}%{% else %}—{% endif %}</td><td>{{ product.component_count }} komponen</td><td>{% if module_editability.production %}<a class="table-action" href="{% url 'product_edit' product.id %}">Ubah</a>{% endif %}</td></tr>
+  {% empty %}<tr><td colspan="6"><div class="empty-inline">Belum ada produk. Tambahkan produk jam pertama Anda.</div></td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% endblock %}

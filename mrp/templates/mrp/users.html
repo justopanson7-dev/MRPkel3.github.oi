@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Pengguna & peran{% endblock %}
+{% block breadcrumb %}Pengguna & peran{% endblock %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">AKSES SISTEM</span><h1>Pengguna & peran</h1><p>Kelola akun dan tingkat akses berdasarkan tanggung jawab kerja.</p></div></div>
+<div class="bom-layout">
+  <section class="panel form-panel"><div class="panel-header"><div><span class="eyebrow">AKUN BARU</span><h2>Buat pengguna</h2></div></div>
+    <form method="post" class="stack-form">{% csrf_token %}
+      {% if form.non_field_errors %}<div class="field-error">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}<div class="field-group"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>{% endfor %}
+      <button class="button primary" type="submit">Buat akun</button>
+    </form>
+  </section>
+  <section class="panel"><div class="panel-header"><div><span class="eyebrow">DAFTAR AKUN</span><h2>{{ profiles|length }} pengguna</h2></div></div>
+    <div class="table-wrap"><table><thead><tr><th>USERNAME</th><th>NAMA</th><th>PERAN</th><th>UBAH PERAN</th></tr></thead><tbody>
+    {% for profile in profiles %}<tr><td class="code-cell">{{ profile.user.username }}</td><td>{{ profile.user.get_full_name|default:"—" }}</td><td>{{ profile.get_role_display }}</td><td>{% if not profile.user.is_superuser %}<form method="post" action="{% url 'user_role_update' profile.user.pk %}" class="inline-form">{% csrf_token %}<select name="role" class="form-control">{% for value,label in role_choices %}<option value="{{ value }}"{% if profile.role == value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select><button class="table-action" type="submit">Simpan</button></form>{% else %}Admin{% endif %}</td></tr>
+    {% empty %}<tr><td colspan="4"><div class="empty-inline">Belum ada akun tambahan.</div></td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+</div>
+{% endblock %}

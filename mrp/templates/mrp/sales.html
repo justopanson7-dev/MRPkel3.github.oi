@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Penjualan{% endblock %}
+{% block breadcrumb %}Penjualan{% endblock %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">PESANAN PELANGGAN</span><h1>Penjualan</h1><p>Harga dan HPP dikunci saat pesanan dibuat. Stok berkurang saat dikirim, kas masuk saat dibayar.</p></div></div>
+<div class="bom-layout">
+  {% if form %}<section class="panel form-panel"><div class="panel-header"><div><span class="eyebrow">PESANAN BARU</span><h2>Buat pesanan</h2></div></div>
+    <form method="post" class="stack-form">{% csrf_token %}
+      {% if form.non_field_errors %}<div class="field-error">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}<div class="field-group"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>{% endfor %}
+      <button class="button primary" type="submit">Buat pesanan <span>→</span></button>
+    </form>
+  </section>{% endif %}
+  <section class="panel"><div class="panel-header"><div><span class="eyebrow">DAFTAR PESANAN</span><h2>{{ orders|length }} pesanan</h2></div></div>
+    <div class="table-wrap"><table><thead><tr><th>NOMOR</th><th>PELANGGAN</th><th>PRODUK</th><th>JUMLAH</th><th>HARGA SATUAN</th><th>NILAI</th><th>HPP / UNIT</th><th>STATUS</th><th>AKSI</th></tr></thead><tbody>
+    {% for order in orders %}<tr><td class="code-cell">{{ order.code }}</td><td>{{ order.customer }}</td><td><strong>{{ order.product.name }}</strong></td><td>{{ order.quantity }}</td><td>Rp {{ order.unit_price|floatformat:"-2" }}</td><td>Rp {{ order.total_amount|floatformat:"-2" }}</td><td>Rp {{ order.hpp_per_unit|floatformat:"-2" }}</td><td><span class="badge {% if order.status == 'paid' %}good{% elif order.status == 'shipped' %}planned{% else %}warning{% endif %}">{{ order.get_status_display }}</span></td><td>
+      {% if can_change_sales and order.status == "new" %}<form method="post" action="{% url 'sales_order_ship' order.pk %}">{% csrf_token %}<button class="table-action" type="submit">Kirim</button></form>
+      {% elif can_pay_sales and order.status == "shipped" %}<form method="post" action="{% url 'sales_order_paid' order.pk %}">{% csrf_token %}<button class="table-action" type="submit">Tandai dibayar</button></form>{% else %}—{% endif %}
+    </td></tr>{% empty %}<tr><td colspan="9"><div class="empty-inline">Belum ada pesanan penjualan.</div></td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+</div>
+{% endblock %}

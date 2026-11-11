@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Keuangan{% endblock %}
+{% block breadcrumb %}Keuangan{% endblock %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">RINGKASAN KEUANGAN</span><h1>Keuangan</h1><p>Omzet, piutang, komitmen PO, laba kotor, dan buku kas.</p></div></div>
+<div class="stat-grid">
+  <article class="stat-card"><div class="stat-label">OMZET</div><div class="stat-value">Rp {{ revenue|floatformat:"-2" }}</div><div class="stat-foot">Pesanan dikirim atau dibayar</div></article>
+  <article class="stat-card"><div class="stat-label">PIUTANG</div><div class="stat-value">Rp {{ receivables|floatformat:"-2" }}</div><div class="stat-foot">Pesanan berstatus Dikirim</div></article>
+  <article class="stat-card"><div class="stat-label">KOMITMEN PO</div><div class="stat-value">Rp {{ purchase_commitments|floatformat:"-2" }}</div><div class="stat-foot">PO berstatus Dipesan</div></article>
+  <article class="stat-card"><div class="stat-label">LABA KOTOR</div><div class="stat-value">Rp {{ gross_profit|floatformat:"-2" }}</div><div class="stat-foot">HPP dikunci saat pesanan dibuat</div></article>
+  <article class="stat-card"><div class="stat-label">KAS MASUK</div><div class="stat-value">Rp {{ cash_income|floatformat:"-2" }}</div><div class="stat-foot">Seluruh transaksi masuk</div></article>
+  <article class="stat-card"><div class="stat-label">KAS KELUAR</div><div class="stat-value">Rp {{ cash_expense|floatformat:"-2" }}</div><div class="stat-foot">Seluruh transaksi keluar</div></article>
+  <article class="stat-card"><div class="stat-label">SALDO BERSIH</div><div class="stat-value">Rp {{ net_cash|floatformat:"-2" }}</div><div class="stat-foot">Kas masuk dikurangi kas keluar</div></article>
+</div>
+<div class="bom-layout">
+  {% if form %}<section class="panel form-panel"><div class="panel-header"><div><span class="eyebrow">KOREKSI / TRANSAKSI MANUAL</span><h2>Catat transaksi baru</h2></div></div>
+    <p class="planning-note" style="margin:0 20px 14px">Transaksi yang sudah dicatat tidak dapat diedit atau dihapus. Buat transaksi baru untuk koreksi dan cantumkan nomor dokumennya.</p>
+    <form method="post" class="stack-form">{% csrf_token %}
+      {% if form.non_field_errors %}<div class="field-error">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}<div class="field-group"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>{% endfor %}
+      <button class="button primary" type="submit">Catat transaksi</button>
+    </form>
+  </section>{% endif %}
+  <section class="panel"><div class="panel-header"><div><span class="eyebrow">BUKU KAS · HANYA TAMBAH</span><h2>{{ cash_transactions|length }} transaksi</h2></div></div>
+    <div class="table-wrap"><table><thead><tr><th>TANGGAL</th><th>KETERANGAN</th><th>DOKUMEN</th><th>JENIS</th><th>JUMLAH</th><th>PENCATAT</th></tr></thead><tbody>
+    {% for entry in cash_transactions %}<tr><td>{{ entry.created_at|date:"d/m/Y H:i" }}</td><td>{{ entry.description }}{% if entry.is_automatic %}<small class="table-sub">Otomatis · tidak dapat diubah</small>{% endif %}</td><td class="code-cell">{{ entry.source_document }}</td><td>{% if entry.transaction_type == "income" %}<span class="badge good">Masuk</span>{% else %}<span class="badge warning">Keluar</span>{% endif %}</td><td>Rp {{ entry.amount|floatformat:"-2" }}</td><td>{{ entry.created_by.username|default:"Sistem" }}</td></tr>
+    {% empty %}<tr><td colspan="6"><div class="empty-inline">Belum ada transaksi kas.</div></td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+</div>
+{% endblock %}

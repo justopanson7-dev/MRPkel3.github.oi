@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Pembelian{% endblock %}
+{% block breadcrumb %}Pembelian{% endblock %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">PENGADAAN BAHAN</span><h1>Pembelian</h1><p>PO menyimpan harga dan pemasok saat dibuat; penerimaan menambah stok dan mencatat kas keluar.</p></div></div>
+{% if can_change_purchasing and suggestions %}
+<section class="panel" style="margin-bottom:17px">
+  <div class="panel-header"><div><span class="eyebrow">SARAN PEMESANAN</span><h2>Bahan di bawah stok minimum</h2></div></div>
+  <div class="table-wrap"><table><thead><tr><th>BAHAN</th><th>STOK</th><th>MINIMUM</th><th>SARAN JUMLAH</th><th></th></tr></thead><tbody>
+  {% for suggestion in suggestions %}<tr><td><strong>{{ suggestion.material.name }}</strong><small class="table-sub">{{ suggestion.material.sku }}</small></td><td>{{ suggestion.material.stock_on_hand|floatformat:"-2" }}</td><td>{{ suggestion.material.minimum_stock|floatformat:"-2" }}</td><td>{{ suggestion.quantity|floatformat:"-2" }} {{ suggestion.material.unit }}</td><td><a class="table-action" href="{% url 'purchase_orders' %}?material={{ suggestion.material.pk }}&quantity={{ suggestion.quantity }}">Buat PO</a></td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% endif %}
+<div class="bom-layout">
+  {% if form %}<section class="panel form-panel"><div class="panel-header"><div><span class="eyebrow">BUAT PURCHASE ORDER</span><h2>Pesan bahan</h2></div></div>
+    <form method="post" class="stack-form">{% csrf_token %}
+      {% if form.non_field_errors %}<div class="field-error">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}<div class="field-group"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>{% endfor %}
+      <p class="help-text">Pemasok dan harga satuan diambil dari data bahan dan dikunci pada PO.</p>
+      <button class="button primary" type="submit">Buat PO <span>→</span></button>
+    </form>
+  </section>{% endif %}
+  <section class="panel"><div class="panel-header"><div><span class="eyebrow">RIWAYAT PENGADAAN</span><h2>{{ orders|length }} purchase order</h2></div></div>
+    <div class="table-wrap"><table><thead><tr><th>NOMOR</th><th>BAHAN</th><th>JUMLAH</th><th>PEMASOK</th><th>HARGA SATUAN</th><th>NILAI PO</th><th>STATUS</th><th>AKSI</th></tr></thead><tbody>
+    {% for order in orders %}<tr><td class="code-cell">{{ order.code }}</td><td><strong>{{ order.material.name }}</strong></td><td>{{ order.quantity|floatformat:"-2" }} {{ order.material.unit }}</td><td>{{ order.supplier }}</td><td>Rp {{ order.unit_price|floatformat:"-2" }}</td><td>Rp {{ order.total_amount|floatformat:"-2" }}</td><td><span class="badge {% if order.status == 'received' %}good{% else %}planned{% endif %}">{{ order.get_status_display }}</span></td><td>{% if can_change_purchasing and order.status == "ordered" %}<form method="post" action="{% url 'purchase_order_receive' order.pk %}">{% csrf_token %}<button class="table-action" type="submit">Terima</button></form>{% else %}—{% endif %}</td></tr>
+    {% empty %}<tr><td colspan="8"><div class="empty-inline">Belum ada purchase order.</div></td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+</div>
+{% endblock %}
